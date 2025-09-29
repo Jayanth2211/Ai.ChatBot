@@ -67,10 +67,10 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('*',function (req,res){
-  res.sendFile(path.join(__dirname,'../FrontEnd/vite-project/dict','index.html'))
+  res.sendFile(path.join(__dirname,'../FrontEnd/vite-project/dist','index.html'))
  
 })
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
