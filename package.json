@@ -5,7 +5,7 @@
   "main": "BackEnd/server.js",
   "scripts": {
     "start": "node BackEnd/server.js",
-    "build": "cd FrontEnd/vite-project && pwd && ls -la && npm install && npm run build && echo '=== After build ===' && ls -la && echo '=== Dist contents ===' && ls -la dist/ || echo 'No dist folder'"
+    "build": "cd FrontEnd/vite-project && pwd && echo '=== Before install ===' && ls -la && npm install 2>&1 && echo '=== After install ===' && ls -la node_modules/.bin/ && echo '=== Building ===' && npm run build 2>&1 && echo '=== After build ===' && ls -la && echo '=== Checking dist ===' && (ls -la dist/ || echo 'DIST FOLDER NOT CREATED')"
   },
   "dependencies": {
     "express": "^4.18.2",
