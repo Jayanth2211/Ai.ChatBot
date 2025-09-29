@@ -5,7 +5,7 @@ import VoiceRecognition from "./components/voiceRecognition.jsx";
 
 function App() {
   return (
-    <main>
+    <main className="bg-zinc-950 !important">
       
         
         <VoiceRecognition/>

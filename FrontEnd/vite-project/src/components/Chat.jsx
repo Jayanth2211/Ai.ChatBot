@@ -103,10 +103,10 @@ React.useEffect(()=>{
     setIsLoading(true);
     setTimeout(()=>{
       fechData()
-    },2000)
+    },1000)
     async function fechData() {
       try {
-        const response = await fetch('http://localhost:3000/api/chat', {
+        const response = await fetch('https://ai-chatbot-5-l8lf.onrender.com/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: userMessage }),
@@ -134,8 +134,8 @@ React.useEffect(()=>{
   };
 
   return (
-    <div className=" flex flex-col h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="w-full bg-white border-b border-gray-200 shadow-sm">
+    <div className=" flex flex-col h-screen ">
+      <div className="w-full bg-gray-100 border-b border-gray-200 shadow-sm">
         <div className="max-w-[95%]  mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-around">
           <h1 className="text-[80%] transform scale-140 w-[40%] font-bold text-gray-900 flex items-center gap-2">
             <span className="text-[100%] text-pink-600"><span className='text-3xl'>O</span><span className='text-2xl'>r</span>vix</span>  AI </h1>
@@ -145,7 +145,7 @@ React.useEffect(()=>{
         
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 ">
+      <div className="flex-1 overflow-y-auto bg-gray-200 p-4 space-y-6 ">
         {messages.length === 0 ? (
           <div className="flex flex-col  items-center justify-center h-full text-center text-gray-500">
             <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +184,7 @@ React.useEffect(()=>{
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex-none p-6 bg-white border-t border-gray-200 shadow-lg">
+      <div className="flex-none p-6 bg-gray-100 border-t border-gray-200 shadow-lg">
         
         
         <form onSubmit={handleSubmit} className="max-w-7xl  mx-auto w-full">
@@ -219,7 +219,7 @@ React.useEffect(()=>{
                 disabled={isLoading || !input.trim()}
                 className="absolute right-2 inline-flex items-center justify-center w-12 h-12 rounded-xl text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                <PaperAirplaneIcon className="h-6 w-6 rotate-90" />
+                <PaperAirplaneIcon className="h-6 w-6 rotate" />
               </button>
             </div>
             <p className="text-xs text-gray-500 text-center">
