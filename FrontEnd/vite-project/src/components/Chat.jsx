@@ -157,7 +157,7 @@ React.useEffect(()=>{
         ) : (
           messages.map((message, index) => (
             <><ChatMessage key={index} message={message.text} isAi={message.isAi} />{message.isAi? (
-              <div className="speaker_box relative  w-[17%]  flex gap-1 items-center justify-end">
+              <div className="speaker_box relative  w-[25%]  flex gap-1 items-center justify-end">
                 <button className='bg-sky-200 rounded-full p-1 text-black border-2 border-sky-300 font-semibold focus:ring-2 focus:ring-offset-2 focus:ring-sky-300 hover:shadow-lg hover:shadow-zinc-300' onClick={()=>say(message.text)}>
               <SpeakerWaveIcon className='h-4 w-4'/>
             </button>
@@ -211,7 +211,7 @@ React.useEffect(()=>{
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 min-h-[60px] px-4 w-[100%] rounded-2xl border-2 border-gray-300 px-15 py-4 text-base focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 transition-all duration-200 pr-16"
+                className="flex-1 min-h-[60px] px-4 w-[100%] rounded-2xl border-2 border-gray-300 px-20 py-4 text-base focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 transition-all duration-200 pr-16"
                 disabled={isLoading}
               />
               <button
