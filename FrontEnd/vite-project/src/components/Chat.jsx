@@ -135,11 +135,11 @@ React.useEffect(()=>{
 
   return (
     <div className=" flex flex-col h-screen ">
-      <div className="w-full bg-gray-100 border-b border-gray-200 shadow-sm">
+      <div className="w-full h-[10%] bg-gray-100 border-b border-gray-200 shadow-sm">
         <div className="max-w-[95%]  mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-around">
           <h1 className="text-[80%] transform scale-140 w-[40%] font-bold text-gray-900 flex items-center gap-2">
             <span className="text-[100%] text-pink-600"><span className='text-3xl'>O</span><span className='text-2xl'>r</span>vix</span>  AI </h1>
-            <div className='w-[40%] flex flex-col items-end justify-end gap-1'><span className='text-sky-600 font-semibold border-x-3 rounded px-2 mx-2 border-sky-800 text-[1xl] bg-slate-200'>Chat+Voice Assistant </span><sub className='text-lime-700'>-Built by Jayanth</sub></div>
+            <div className='w-[40%] flex flex-col items-end justify-end gap-1'><sub className='text-lime-700'>-Built by Jayanth</sub></div>
           
         </div>
         
@@ -157,7 +157,7 @@ React.useEffect(()=>{
         ) : (
           messages.map((message, index) => (
             <><ChatMessage key={index} message={message.text} isAi={message.isAi} />{message.isAi? (
-              <div className="speaker_box relative  w-[25%]  flex gap-1 items-center justify-end">
+              <div className="speaker_box relative   flex gap-1 items-center justify-center">
                 <button className='bg-sky-200 rounded-full p-1 text-black border-2 border-sky-300 font-semibold focus:ring-2 focus:ring-offset-2 focus:ring-sky-300 hover:shadow-lg hover:shadow-zinc-300' onClick={()=>say(message.text)}>
               <SpeakerWaveIcon className='h-4 w-4'/>
             </button>
@@ -184,7 +184,7 @@ React.useEffect(()=>{
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex-none p-6 bg-gray-100 border-t border-gray-200 shadow-lg">
+      <div className="flex-none p-6 bg-gray-100 h-[18%]  border-t border-gray-200 shadow-lg">
         
         
         <form onSubmit={handleSubmit} className="max-w-7xl  mx-auto w-full">
@@ -211,7 +211,7 @@ React.useEffect(()=>{
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 min-h-[60px] px-4 w-[100%] rounded-2xl border-2 border-gray-300 px-20 py-4 text-base focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 transition-all duration-200 pr-16"
+                className="flex-1 min-h-[60px] w-[100%] rounded-2xl border-2 border-gray-300 px-20 py-4 text-base focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 transition-all duration-200 pr-16"
                 disabled={isLoading}
               />
               <button
