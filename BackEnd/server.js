@@ -17,10 +17,10 @@ const distPath = path.join(__dirname, '../FrontEnd/vite-project/dist');
 console.log('Looking for dist at:', distPath);
 
 if (fs.existsSync(distPath)) {
-  console.log('✅ Serving from dist folder');
+  console.log('Serving from dist folder');
   app.use(express.static(distPath));
 } else {
-  console.log('❌ Dist folder not found, serving basic HTML');
+  console.log(' Dist folder not found, serving basic HTML');
 }
 
 // Your API routes (keep your existing chat endpoint)
@@ -49,11 +49,11 @@ app.post('/api/chat', async (req, res) => {
     } else if (lowerMessage.includes('help')) {
       aiResponse = "I can answer questions, chat with you, or help with various topics. What would you like to know?";
     } else if (lowerMessage.includes('date') && lowerMessage.includes('time')) {
-      aiResponse = `Today date is : ${date.toLocaleDateString()} and current time is: ${date.toLocaleTimeString()}`;
+      aiResponse = `Today date is : ${date.toLocaleDateString('en-IN',{timeZone:"Asia/Kolkata"})} and current time is: ${date.toLocaleTimeString('en-IN',{timeZone:"Asia/Kolkata"})}`;
     } else if (lowerMessage.includes('time')) {
-      aiResponse = `Current time is: ${date.toLocaleTimeString()}`;
+      aiResponse = `Current time is: ${date.toLocaleTimeString('en-IN',{timeZone:"Asia/Kolkata"})}`;
     } else if (lowerMessage.includes('date')) {
-      aiResponse = `Today date is : ${date.toLocaleDateString()} `;
+      aiResponse = `Today date is : ${date.toLocaleDateString('en-IN',{timeZone:"Asia/Kolkata"})} `;
     } else {
       aiResponse = `I understand you're saying: "${message}". That's interesting! Can you tell me more?`;
     }
