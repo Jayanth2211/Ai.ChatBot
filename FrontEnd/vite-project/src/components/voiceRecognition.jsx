@@ -1,13 +1,13 @@
 import React from "react"
 
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import Chat from "./Chat.jsx";
-function VoiceRecognition(){
+
+function useVoiceRecognition(){
       const {transcript,listening,interimTranscript,browserSupportsSpeechRecognition,resetTranscript}=useSpeechRecognition()
     //Recognition is ready
-    const start=React.useCallback(()=>SpeechRecognition.startListening({continuous:true,language:'en-IN',interimTranscript:true}),[])
+    const startListen=React.useCallback(()=>SpeechRecognition.startListening({continuous:true,language:'en-IN',interimTranscript:true}),[])
 
-    const stop=React.useCallback(()=>SpeechRecognition.stopListening(),[])
+    const stopListen=React.useCallback(()=>SpeechRecognition.stopListening(),[])
 
   // Correct reset function using useCallback
   const reset = React.useCallback(() => {
@@ -22,13 +22,10 @@ function VoiceRecognition(){
     if(!browserSupportsSpeechRecognition){
         return <span>Browser doesn't support speech recognition.</span>
     }
-    return(
+    return {listening,startListen,stopListen,reset,displayText,browserSupportsSpeechRecognition}
         
-        <div>
-            <Chat listening1={listening} start1={start} stop1={stop} reset1={reset} displayText1={displayText} browserSupportsSpeechRecognition1={browserSupportsSpeechRecognition}/>
-            
-        </div>
         
-    )
+        
+    
 }
-export default VoiceRecognition
+export default useVoiceRecognition

@@ -1,14 +1,15 @@
 import React from "react"
+import Chat from "./components/Chat.jsx"
 
-import VoiceRecognition from "./components/voiceRecognition.jsx";
+
 
 
 function App() {
   return (
     <main className="bg-zinc-950 !important">
       
+      <Chat/>  
         
-        <VoiceRecognition/>
         
     </main>
     

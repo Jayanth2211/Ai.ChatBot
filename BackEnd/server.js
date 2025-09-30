@@ -440,8 +440,8 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 8000; // Changed from 3000 to 5000
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Orvix AI Server running on port ${PORT}`);
-  console.log(`📍 Health: http://localhost:${PORT}/api/health`);
-  console.log(`📍 IP Location: http://localhost:${PORT}/api/location/ip-enhanced`);
-  console.log(`📍 Chat API: http://localhost:${PORT}/api/chat`);
+  console.log(` Orvix AI Server running on port ${PORT}`);
+  console.log(` Health: http://localhost:${PORT}/api/health`);
+  console.log(` IP Location: http://localhost:${PORT}/api/location/ip-enhanced`);
+  console.log(` Chat API: http://localhost:${PORT}/api/chat`);
 });

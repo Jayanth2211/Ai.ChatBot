@@ -5,8 +5,9 @@ import { MicOff } from './micoff.jsx';
 import { MicrophoneIcon, SpeakerWaveIcon,SpeakerXMarkIcon, PauseIcon,PlayIcon, UserIcon, ComputerDesktopIcon } from '@heroicons/react/24/outline';
 import { useSpeak } from 'react-text-to-speech';
 import { useLocation } from './locationservices.jsx';
+import useVoiceRecognition from './voiceRecognition.jsx';
 
-const Chat = (popse) => {
+const Chat = () => {
   const { ipLocation,
     deviceLocation,
     areaName,
@@ -20,7 +21,7 @@ const [textMsg,setTextMessage]=React.useState("he i am fine")
   const [pauseVoice,setPause]=React.useState(true)
    
 
-  const {listening1,start1,stop1,reset1,displayText1,browserSupportsSpeechRecognition1}=popse
+  const {listening,startListen,stopListen,reset,displayText,browserSupportsSpeechRecognition}=useVoiceRecognition()
     const [micro,setMicro]=useState(true)
 
   const [messages, setMessages] = useState([]);
@@ -35,7 +36,7 @@ const [textMsg,setTextMessage]=React.useState("he i am fine")
     const startTimer=()=>{
       timeout.current=setTimeout(()=>{
        
-        stop1()
+        stopListen()
          setMicro(true)
          
         
@@ -54,7 +55,7 @@ const [textMsg,setTextMessage]=React.useState("he i am fine")
 
  useEffect(()=>{
    resetTimer()
- },[listening1,displayText1])
+ },[listening,displayText])
 
 
  function say(content){
@@ -78,17 +79,17 @@ const [textMsg,setTextMessage]=React.useState("he i am fine")
     scrollToBottom();
   }, [messages]);
 React.useEffect(()=>{
-  if(displayText1){
-    setInput(displayText1)
+  if(displayText){
+    setInput(displayText)
   }
-},[displayText1])
+},[displayText])
  const startRconize=React.useCallback(()=>{
    if(micro){
-    start1()
+    startListen()
   
    }
    else{
-    stop1()
+    stopListen()
    }
    setMicro(!micro)
    console.log("execution");
@@ -102,8 +103,8 @@ React.useEffect(()=>{
 
     const userMessage = input.trim();
     setInput('');
-    if(displayText1){
-      stop1()
+    if(displayText){
+      stopListen()
       setMicro(true)
     }
     setMessages(prev => [...prev, { text: userMessage, isAi: false }]);
@@ -163,7 +164,7 @@ React.useEffect(()=>{
       }
      }
      
-       reset1()
+       reset()
     }
   };
 
@@ -173,7 +174,7 @@ React.useEffect(()=>{
         <div className="max-w-[95%]  mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
           <h1 className="text-[80%] transform scale-140 w-[40%] font-bold text-gray-900 flex items-center gap-2">
             <span className="text-[100%] text-pink-600"><span className='text-3xl'>O</span><span className='text-2xl'>r</span>vix</span>  AI </h1>
-            <div className='w-[40%] flex flex-col items-end justify-end gap-1'><span className='text-slate-700 font-semibold'>  &copy;JAYANTH</span></div>
+            <div className='w-[40%] flex flex-col items-end justify-end gap-1'><span className='text-slate-700 font-semibold'>  <a href="https://jayanth-portfolio.onrender.com/" target='_blank'>&copy;JAYANTH</a></span></div>
           
         </div>
         
@@ -223,7 +224,7 @@ React.useEffect(()=>{
         
         <form onSubmit={handleSubmit} className="max-w-7xl  mx-auto w-full">
           <div className="flex flex-col space-y-3">
-            {listening1 && (
+            {listening && (
         <div className="flex items-center mb-2">
           <div className="w-3 h-3 bg-sky-800 rounded-full animate-pulse mr-2"></div>
           <span className="text-sm">Listening...</span>
