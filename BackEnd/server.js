@@ -48,7 +48,7 @@ if (fs.existsSync(distPath)) {
 const reverseGeocode = async (latitude, longitude) => {
   try {
     // You can get free API key from positionstack.com
-    const API_KEY = 'YOUR_FREE_API_KEY'; // Get from positionstack.com
+    const API_KEY = '7cb5975ab3de0a06e5d28d08d251814f'; // Get from positionstack.com
     const response = await fetch(
       `http://api.positionstack.com/v1/reverse?access_key=${API_KEY}&query=${latitude},${longitude}`
     );
