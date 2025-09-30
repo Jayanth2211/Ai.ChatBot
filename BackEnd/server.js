@@ -45,6 +45,7 @@ if (fs.existsSync(distPath)) {
 // Simple reverse geocoding function
 // Reliable reverse geocoding function
 // Alternative using PositionStack (free 25k requests/month)
+
 const reverseGeocode = async (latitude, longitude) => {
   try {
     const API_KEY = '7cb5975ab3de0a06e5d28d08d251814f';
