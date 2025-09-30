@@ -43,28 +43,39 @@ if (fs.existsSync(distPath)) {
 
 // Utility function for reverse geocoding
 // Simple reverse geocoding function
+// Reliable reverse geocoding function
 const reverseGeocode = async (latitude, longitude) => {
   try {
-    // Simple fetch without complex headers
+    // Use BigDataCloud API (free, no API key needed, reliable)
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
     );
     
     const data = await response.json();
     
-    if (data && data.display_name) {
+    if (data && data.locality) {
+      // Build a detailed address
+      let address = '';
+      if (data.locality) address += data.locality; // Area/Neighborhood
+      if (data.city) address += `, ${data.city}`; // City
+      if (data.principalSubdivision) address += `, ${data.principalSubdivision}`; // State
+      if (data.countryName) address += `, ${data.countryName}`; // Country
+      
       return {
         success: true,
-        address: data.display_name,
+        address: address,
         details: {
-          city: data.address?.city || data.address?.town || data.address?.village,
-          state: data.address?.state,
-          country: data.address?.country,
-          postcode: data.address?.postcode
+          area: data.locality, // This is what you need - area inside city
+          locality: data.locality,
+          city: data.city,
+          state: data.principalSubdivision,
+          country: data.countryName,
+          postcode: data.postcode,
+          continent: data.continent
         }
       };
     } else {
-      // If no display_name, still return success with coordinates
+      // Fallback with coordinates
       return {
         success: true,
         address: `Location at ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
@@ -79,7 +90,7 @@ const reverseGeocode = async (latitude, longitude) => {
   } catch (error) {
     console.log('Geocoding error:', error.message);
     
-    // Always return success with coordinates as fallback
+    // Fallback with coordinates
     return {
       success: true,
       address: `Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
