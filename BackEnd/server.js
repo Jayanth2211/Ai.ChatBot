@@ -47,41 +47,93 @@ if (fs.existsSync(distPath)) {
 // Alternative using PositionStack (free 25k requests/month)
 const reverseGeocode = async (latitude, longitude) => {
   try {
-    // You can get free API key from positionstack.com
-    const API_KEY = '7cb5975ab3de0a06e5d28d08d251814f'; // Get from positionstack.com
+    const API_KEY = '7cb5975ab3de0a06e5d28d08d251814f';
+    
+    console.log('Making PositionStack request...');
     const response = await fetch(
       `http://api.positionstack.com/v1/reverse?access_key=${API_KEY}&query=${latitude},${longitude}`
     );
     
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
     const data = await response.json();
     
-    if (data && data.data && data.data[0]) {
+    console.log('PositionStack full response:', data); // Debug log
+    
+    // Check if we have valid data
+    if (data && data.data && data.data.length > 0 && data.data[0]) {
       const location = data.data[0];
+      
+      console.log('Location data:', location); // Debug log
+      
       return {
         success: true,
-        address: location.label,
+        address: location.label || `${location.name}, ${location.region}, ${location.country}`,
         details: {
-          area: location.neighbourhood || location.locality,
+          area: location.neighbourhood || location.locality || location.region,
           locality: location.locality,
-          city: location.locality,
+          city: location.locality || location.region,
           state: location.region,
           country: location.country,
-          postcode: location.postal_code
+          postcode: location.postal_code,
+          latitude: latitude,
+          longitude: longitude
+        }
+      };
+    } else {
+      console.log('No location data found in response');
+      // Check if there's an error in the response
+      if (data.error) {
+        console.log('PositionStack API error:', data.error);
+      }
+    }
+    
+  } catch (error) {
+    console.log('PositionStack request failed:', error.message);
+  }
+  
+  // If PositionStack fails, try BigDataCloud as fallback
+  try {
+    console.log('Trying BigDataCloud fallback...');
+    const response = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+    );
+    
+    const data = await response.json();
+    
+    console.log('BigDataCloud response:', data);
+    
+    if (data && data.locality) {
+      return {
+        success: true,
+        address: `${data.locality}, ${data.city}, ${data.principalSubdivision}, ${data.countryName}`,
+        details: {
+          area: data.locality,
+          locality: data.locality,
+          city: data.city,
+          state: data.principalSubdivision,
+          country: data.countryName,
+          postcode: data.postcode,
+          latitude: latitude,
+          longitude: longitude
         }
       };
     }
     
   } catch (error) {
-    console.log('PositionStack error:', error.message);
+    console.log('BigDataCloud also failed:', error.message);
   }
   
-  // Final fallback
+  // Final fallback - at least provide coordinates in a nice format
   return {
     success: true,
-    address: `Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+    address: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
     details: {
       latitude: latitude,
-      longitude: longitude
+      longitude: longitude,
+      note: 'Exact address not available'
     }
   };
 };
