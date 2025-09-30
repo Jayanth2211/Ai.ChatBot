@@ -113,7 +113,7 @@ React.useEffect(()=>{
       fechData()
     
     async function fechData() {
-      if(userMessage.toLowerCase()=="location"  || userMessage.toLowerCase()=="place"){
+      if(userMessage.toLowerCase().includes("location")  || userMessage.toLowerCase().includes("place")){
            // Wait for both location functions to complete
           
       try{
