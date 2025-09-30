@@ -4,9 +4,16 @@ import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import { MicOff } from './micoff.jsx';
 import { MicrophoneIcon, SpeakerWaveIcon,SpeakerXMarkIcon, PauseIcon,PlayIcon, UserIcon, ComputerDesktopIcon } from '@heroicons/react/24/outline';
 import { useSpeak } from 'react-text-to-speech';
+import { useLocation } from './locationservices.jsx';
 
 const Chat = (popse) => {
-  
+  const { ipLocation,
+    deviceLocation,
+    areaName,
+    loading,
+    error,
+    fetchIPLocation,
+    getDeviceLocation}=useLocation()
 //speak
 const [textMsg,setTextMessage]=React.useState("he i am fine")
   const {start,pause,stop,speechStatus}=useSpeak({text:textMsg})
@@ -101,12 +108,37 @@ React.useEffect(()=>{
     }
     setMessages(prev => [...prev, { text: userMessage, isAi: false }]);
     setIsLoading(true);
-    setTimeout(()=>{
+    
       fechData()
-    },1000)
+    
     async function fechData() {
-      try {
-        const response = await fetch('https://ai-chatbot-5-l8lf.onrender.com/api/chat', {
+      if(userMessage.toLowerCase()=="location"  || userMessage.toLowerCase()=="place"){
+           // Wait for both location functions to complete
+          
+      try{
+        const ipData = await fetchIPLocation();
+      const deviceData = await getDeviceLocation();
+      
+      
+      console.log("Device Data:", deviceData.areaName.address)
+      const locationMessage=`Your location: ${deviceData.areaName.address || ipData.area }`
+      setMessages(pre=>[...pre,{text:locationMessage,isAi:true}])
+
+      }
+      catch(err){
+        setMessages(prev=>[...prev,{text:"can't able to fetch location",isAi:true}])
+      }
+      finally{
+        setIsLoading(false)
+      }
+        
+        
+        
+
+      }
+     else{
+       try {
+        const response = await fetch('http://localhost:8000/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: userMessage }),
@@ -128,6 +160,7 @@ React.useEffect(()=>{
       } finally {
         setIsLoading(false);
       }
+     }
      
        reset1()
     }

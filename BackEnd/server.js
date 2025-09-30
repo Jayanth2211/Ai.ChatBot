@@ -3,14 +3,33 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const geoip = require('geoip-lite');
+const requestIp = require('request-ip');
+const axios = require('axios');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 dotenv.config();
 const app = express();
 
-app.use(cors());
+// Security middleware
+app.use(helmet());
+// Update CORS to allow Vite frontend
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080'],
+  credentials: true
+}));
 app.use(express.json());
+app.use(requestIp.mw());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 
 // Try to serve static files
 const distPath = path.join(__dirname, '../FrontEnd/vite-project/dist');
@@ -23,7 +42,260 @@ if (fs.existsSync(distPath)) {
   console.log(' Dist folder not found, serving basic HTML');
 }
 
-// Your API routes (keep your existing chat endpoint)
+// ========== LOCATION SERVICES ========== //
+
+// Utility function for reverse geocoding
+const reverseGeocode = async (latitude, longitude) => {
+  try {
+    const response = await axios.get(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+    );
+    
+    return {
+      success: true,
+      address: response.data.display_name,
+      details: {
+        road: response.data.address?.road,
+        suburb: response.data.address?.suburb,
+        city: response.data.address?.city || response.data.address?.town || response.data.address?.village,
+        state: response.data.address?.state,
+        country: response.data.address?.country,
+        postcode: response.data.address?.postcode,
+        country_code: response.data.address?.country_code
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Reverse geocoding failed'
+    };
+  }
+};
+
+// Utility function for IP location
+const getEnhancedIPLocation = async (ip) => {
+  try {
+    // Handle localhost IPs
+    let testIP = ip;
+    if (ip === '::1' || ip === '127.0.0.1') {
+      // Use a public IP for testing or fetch external IP
+      try {
+        const externalIPResponse = await axios.get('https://api.ipify.org?format=json');
+        testIP = externalIPResponse.data.ip;
+      } catch {
+        testIP = '8.8.8.8'; // Fallback to Google DNS
+      }
+    }
+
+    // Get IP details from ipapi.co
+    const ipResponse = await axios.get(`https://ipapi.co/${testIP}/json/`);
+    const ipData = ipResponse.data;
+
+    return {
+      success: true,
+      ip: ip,
+      public_ip: testIP,
+      city: ipData.city,
+      region: ipData.region,
+      country: ipData.country_name,
+      country_code: ipData.country_code,
+      latitude: ipData.latitude,
+      longitude: ipData.longitude,
+      timezone: ipData.timezone,
+      isp: ipData.org,
+      postal: ipData.postal,
+      area: `${ipData.city}, ${ipData.region}, ${ipData.country_name}`,
+      full_address: `${ipData.city}, ${ipData.region}, ${ipData.country_name} - ${ipData.postal}`
+    };
+  } catch (error) {
+    // Fallback to geoip-lite if external service fails
+    const geo = geoip.lookup(ip);
+    if (geo) {
+      return {
+        success: true,
+        ip: ip,
+        city: geo.city,
+        region: geo.region,
+        country: geo.country,
+        latitude: geo.ll[0],
+        longitude: geo.ll[1],
+        timezone: geo.timezone,
+        area: `${geo.city}, ${geo.region}, ${geo.country}`,
+        source: 'geoip-lite'
+      };
+    }
+    
+    return {
+      success: false,
+      error: 'Failed to fetch IP location'
+    };
+  }
+};
+
+// ========== LOCATION API ROUTES ========== //
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'Server is healthy', 
+    timestamp: new Date().toISOString(),
+    distExists: fs.existsSync(distPath),
+    service: 'Orvix AI Backend with Location Services'
+  });
+});
+
+// Basic IP location (simple)
+app.get('/api/location/ip', (req, res) => {
+  try {
+    const clientIP = req.clientIp;
+    const geo = geoip.lookup(clientIP);
+    
+    res.json({
+      ip: clientIP,
+      country: geo?.country,
+      region: geo?.region,
+      city: geo?.city,
+      latitude: geo?.ll?.[0],
+      longitude: geo?.ll?.[1],
+      timezone: geo?.timezone
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch location' });
+  }
+});
+
+// Enhanced IP location with area names
+app.get('/api/location/ip-enhanced', async (req, res) => {
+  try {
+    const clientIP = req.clientIp;
+    const ipLocation = await getEnhancedIPLocation(clientIP);
+    
+    if (ipLocation.success) {
+      res.json(ipLocation);
+    } else {
+      res.status(500).json({ error: ipLocation.error });
+    }
+  } catch (error) {
+    console.error('Enhanced IP location error:', error);
+    res.status(500).json({ error: 'Failed to fetch enhanced location' });
+  }
+});
+
+// Reverse geocoding - coordinates to address
+app.get('/api/location/reverse-geocode', async (req, res) => {
+  try {
+    const { latitude, longitude } = req.query;
+    
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: 'Latitude and longitude are required' });
+    }
+
+    const geocodeResult = await reverseGeocode(latitude, longitude);
+    
+    if (geocodeResult.success) {
+      res.json({
+        coordinates: { latitude: parseFloat(latitude), longitude: parseFloat(longitude) },
+        ...geocodeResult
+      });
+    } else {
+      res.status(500).json({ error: geocodeResult.error });
+    }
+  } catch (error) {
+    console.error('Reverse geocoding error:', error);
+    res.status(500).json({ error: 'Reverse geocoding failed' });
+  }
+});
+
+// Device location storage with reverse geocoding
+app.post('/api/location/device', async (req, res) => {
+  try {
+    const { latitude, longitude, accuracy, timestamp = new Date().toISOString() } = req.body;
+    
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: 'Latitude and longitude are required' });
+    }
+
+    // Get address from coordinates
+    const geocodeResult = await reverseGeocode(latitude, longitude);
+    
+    const locationData = {
+      coordinates: {
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+        accuracy: accuracy ? parseFloat(accuracy) : null
+      },
+      timestamp,
+      ...geocodeResult
+    };
+
+    console.log('Device location received:', locationData);
+
+    res.json({
+      success: true,
+      message: 'Location received and processed',
+      data: locationData
+    });
+  } catch (error) {
+    console.error('Device location error:', error);
+    res.status(500).json({ error: 'Failed to process device location' });
+  }
+});
+
+// Complete location info (IP + reverse geocode if coordinates provided)
+app.get('/api/location/complete', async (req, res) => {
+  try {
+    const clientIP = req.clientIp;
+    const { latitude, longitude } = req.query;
+    
+    // Get IP location
+    const ipLocation = await getEnhancedIPLocation(clientIP);
+    
+    let deviceLocation = null;
+    
+    // If coordinates provided, get reverse geocode
+    if (latitude && longitude) {
+      const geocodeResult = await reverseGeocode(latitude, longitude);
+      if (geocodeResult.success) {
+        deviceLocation = {
+          coordinates: { latitude: parseFloat(latitude), longitude: parseFloat(longitude) },
+          ...geocodeResult
+        };
+      }
+    }
+
+    res.json({
+      ip_location: ipLocation.success ? ipLocation : { error: ipLocation.error },
+      device_location: deviceLocation,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Complete location error:', error);
+    res.status(500).json({ error: 'Failed to fetch complete location data' });
+  }
+});
+
+// Get client IP info
+app.get('/api/ip-info', (req, res) => {
+  try {
+    const clientIP = req.clientIp;
+    const headers = req.headers;
+    
+    res.json({
+      ip: clientIP,
+      headers: {
+        'user-agent': headers['user-agent'],
+        'accept-language': headers['accept-language'],
+        'x-forwarded-for': headers['x-forwarded-for']
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get IP info' });
+  }
+});
+
+// ========== YOUR EXISTING CHAT CODE (UNMODIFIED) ========== //
+
 app.post('/api/chat', async (req, res) => {
   // Your existing chat code here
   try {
@@ -45,7 +317,7 @@ app.post('/api/chat', async (req, res) => {
     } else if (lowerMessage.includes('thank')) {
       aiResponse = "You're welcome! Is there anything else I can help with?";
     } else if (lowerMessage.includes('name')) {
-      aiResponse = "I'm Progskill AI Assistant! Nice to meet you!";
+      aiResponse = "I'm Orvix AI Assistant! Nice to meet you!";
     } else if (lowerMessage.includes('help')) {
       aiResponse = "I can answer questions, chat with you, or help with various topics. What would you like to know?";
     } else if (lowerMessage.includes('date') && lowerMessage.includes('time')) {
@@ -66,14 +338,7 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'Server is healthy', 
-    timestamp: new Date().toISOString(),
-    distExists: fs.existsSync(distPath)
-  });
-});
+// ========== SERVE FRONTEND ========== //
 
 // Serve frontend or basic HTML
 app.get('*', (req, res) => {
@@ -87,7 +352,7 @@ app.get('*', (req, res) => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>AI Chatbot</title>
+          <title>Orvix AI Chatbot</title>
           <style>
             body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
             .chat-container { border: 1px solid #ccc; padding: 20px; border-radius: 10px; }
@@ -97,7 +362,7 @@ app.get('*', (req, res) => {
           </style>
         </head>
         <body>
-          <h1>AI Chatbot</h1>
+          <h1>Orvix AI Chatbot</h1>
           <div class="chat-container">
             <div id="chat"></div>
             <input type="text" id="message" placeholder="Type your message..." style="width: 70%; padding: 10px;">
@@ -137,7 +402,10 @@ app.get('*', (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000; // Changed from 3000 to 5000
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Orvix AI Server running on port ${PORT}`);
+  console.log(`📍 Health: http://localhost:${PORT}/api/health`);
+  console.log(`📍 IP Location: http://localhost:${PORT}/api/location/ip-enhanced`);
+  console.log(`📍 Chat API: http://localhost:${PORT}/api/chat`);
 });
