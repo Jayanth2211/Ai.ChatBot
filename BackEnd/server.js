@@ -189,6 +189,7 @@ app.get('/api/location/reverse-geocode', async (req, res) => {
     if (!latitude || !longitude) {
       return res.status(400).json({ error: 'Latitude and longitude are required' });
     }
+    
 
     const geocodeResult = await reverseGeocode(latitude, longitude);
     
