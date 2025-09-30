@@ -46,65 +46,42 @@ if (fs.existsSync(distPath)) {
 // Reliable reverse geocoding function
 // Alternative using PositionStack (free 25k requests/month)
 
+// Replace with your actual free API key from PositionStack
+const API_KEY = 'pk_1a2b3c4d5e6f7g8h9i0j'; // Example of real API key format
+
 const reverseGeocode = async (latitude, longitude) => {
   try {
-    const API_KEY = '7cb5975ab3de0a06e5d28d08d251814f';
-    
     const response = await fetch(
-      `https://api.positionstack.com/v1/reverse?access_key=${API_KEY}&query=${latitude},${longitude}`
+      `http://api.positionstack.com/v1/reverse?access_key=${API_KEY}&query=${latitude},${longitude}`
     );
     
     const data = await response.json();
     
-    // Log the full response to see what's happening
-    console.log('=== POSITIONSTACK DEBUG ===');
-    console.log('API Response:', data);
-    console.log('Data available:', data && data.data && data.data.length > 0);
-    if (data && data.data && data.data.length > 0) {
-      console.log('First location:', data.data[0]);
-    }
-    console.log('==========================');
-    
-    if (data && data.data && data.data.length > 0) {
+    if (data && data.data && data.data[0]) {
       const location = data.data[0];
-      
-      // Build address from available components
-      const addressParts = [];
-      if (location.name) addressParts.push(location.name);
-      if (location.locality) addressParts.push(location.locality);
-      if (location.region) addressParts.push(location.region);
-      if (location.country) addressParts.push(location.country);
-      
-      const address = addressParts.length > 0 ? addressParts.join(', ') : location.label;
-      
       return {
         success: true,
-        address: address,
+        address: location.label,
         details: {
-          area: location.neighbourhood || location.locality || location.region,
+          area: location.neighbourhood || location.locality,
           locality: location.locality,
-          city: location.locality || location.region,
+          city: location.locality,
           state: location.region,
           country: location.country,
-          postcode: location.postal_code,
-          latitude: latitude,
-          longitude: longitude
+          postcode: location.postal_code
         }
       };
     }
     
   } catch (error) {
-    console.log('Geocoding error:', error.message);
+    console.log('PositionStack error:', error.message);
   }
   
   // Fallback
   return {
     success: true,
-    address: `Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-    details: {
-      latitude: latitude,
-      longitude: longitude
-    }
+    address: `Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+    details: { latitude, longitude }
   };
 };
 
