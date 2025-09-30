@@ -8,6 +8,28 @@ export const useLocation = () => {
   const [areaName, setAreaName] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [longitude_address,setLongitude]=useState(null)
+  const [latitude_address,setLatitude]=useState(null)
+
+  function fetchLocation(){
+   
+      return new Promise((resolve,reject)=>{
+        navigator.geolocation.getCurrentPosition((position)=>{
+          const {longitude,latitude}=position.coords
+          resolve({longitude,latitude})
+        },
+        (error)=>{
+          reject(error)
+        }
+      )
+      })
+       
+       
+       
+    }
+  
+   
+  
 
   // Test backend connection on component mount
   useEffect(() => {
@@ -114,6 +136,7 @@ export const useLocation = () => {
     loading,
     error,
     fetchIPLocation,
-    getDeviceLocation
+    getDeviceLocation,
+    fetchLocation
   };
 };

@@ -14,7 +14,9 @@ const Chat = () => {
     loading,
     error,
     fetchIPLocation,
-    getDeviceLocation}=useLocation()
+    getDeviceLocation,
+   fetchLocation
+  }=useLocation()
 //speak
 const [textMsg,setTextMessage]=React.useState("he i am fine")
   const {start,pause,stop,speechStatus}=useSpeak({text:textMsg})
@@ -133,7 +135,107 @@ React.useEffect(()=>{
       finally{
         setIsLoading(false)
       }
-        
+    }
+      else if(userMessage.toLowerCase().includes("wether")){
+        try{
+          const {latitude,longitude}=await fetchLocation()
+          const api_key='82ccdfb8e81f438eadf205357253009'
+          const res=await fetch(`http://api.weatherapi.com/v1/current.json?key=${api_key}&q=${latitude},${longitude}`)
+          const data=await res.json()
+          
+         let weatherMessage = "";
+
+// Time-based greeting
+const currentHour = new Date().getHours();
+const isDay = data.current.is_day;
+if (isDay === 1) {
+    if (currentHour < 12) weatherMessage += "Good morning! ";
+    else if (currentHour < 17) weatherMessage += "Good afternoon! ";
+    else weatherMessage += "Good evening! ";
+} else {
+    weatherMessage += "Good evening! ";
+}
+
+// Location with coordinates
+weatherMessage += `At your current location (${data.location.lat}, ${data.location.lon}) in ${data.location.name}, `;
+
+// Temperature explanation
+if (data.current.temp_c > 35) {
+    weatherMessage += `it's very hot at ${data.current.temp_c}°C. `;
+} else if (data.current.temp_c > 28) {
+    weatherMessage += `it's quite warm at ${data.current.temp_c}°C. `;
+} else if (data.current.temp_c > 22) {
+    weatherMessage += `the temperature is pleasant at ${data.current.temp_c}°C. `;
+} else if (data.current.temp_c > 15) {
+    weatherMessage += `it's mild at ${data.current.temp_c}°C. `;
+} else if (data.current.temp_c > 5) {
+    weatherMessage += `it's cool at ${data.current.temp_c}°C. `;
+} else {
+    weatherMessage += `it's cold at ${data.current.temp_c}°C. `;
+}
+
+// Weather condition
+const condition = data.current.condition.text.toLowerCase();
+if (condition.includes("sunny") || condition.includes("clear")) {
+    weatherMessage += "The skies are clear and sunny. ";
+} else if (condition.includes("partly cloudy")) {
+    weatherMessage += "It's partly cloudy. ";
+} else if (condition.includes("cloudy") || condition.includes("overcast")) {
+    weatherMessage += "The sky is overcast with clouds. ";
+} else if (condition.includes("rain") || condition.includes("drizzle")) {
+    weatherMessage += "There's rainfall. ";
+} else if (condition.includes("snow")) {
+    weatherMessage += "It's snowing. ";
+} else {
+    weatherMessage += `The weather is ${data.current.condition.text}. `;
+}
+
+// Wind explanation
+if (data.current.wind_kph > 25) {
+    weatherMessage += `Strong winds are blowing from ${data.current.wind_dir} at ${data.current.wind_kph} km/h. `;
+} else if (data.current.wind_kph > 15) {
+    weatherMessage += `There's a moderate breeze from ${data.current.wind_dir} at ${data.current.wind_kph} km/h. `;
+} else if (data.current.wind_kph > 5) {
+    weatherMessage += `A light breeze is coming from ${data.current.wind_dir}. `;
+} else {
+    weatherMessage += "The air is calm with little wind. ";
+}
+
+// Humidity explanation
+if (data.current.humidity > 80) {
+    weatherMessage += "The humidity is very high, so it might feel muggy. ";
+} else if (data.current.humidity > 60) {
+    weatherMessage += "The humidity is moderate. ";
+} else if (data.current.humidity < 30) {
+    weatherMessage += "The air is quite dry. ";
+} else {
+    weatherMessage += "Humidity levels are comfortable. ";
+}
+
+// Time-specific advice
+if (isDay === 0) { // Night time
+    weatherMessage += "Enjoy the night weather!";
+} else { // Day time
+    if (data.current.temp_c > 28) {
+        weatherMessage += "Stay hydrated if you're going out!";
+    } else if (data.current.temp_c < 10) {
+        weatherMessage += "Dress warmly today!";
+    } else {
+        weatherMessage += "Perfect weather for outdoor activities!";
+    }
+}
+
+console.log(weatherMessage);
+setMessages(prev=>[...prev,{text:weatherMessage,isAi:true}])
+          
+        }
+        catch(err){
+          setMessages(prev=>[...prev,{text:"Your Browser not supporting Try Again",isAi:true}])
+          
+        }
+        finally{
+          setIsLoading(false)
+        }
         
         
 
