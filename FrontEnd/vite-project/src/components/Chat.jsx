@@ -140,7 +140,7 @@ React.useEffect(()=>{
         try{
           const {latitude,longitude}=await fetchLocation()
           const api_key='82ccdfb8e81f438eadf205357253009'
-          const res=await fetch(`http://api.weatherapi.com/v1/current.json?key=${api_key}&q=${latitude},${longitude}`)
+          const res=await fetch(`https://api.weatherapi.com/v1/current.json?key=${api_key}&q=${latitude},${longitude}`)
           const data=await res.json()
           
          let weatherMessage = "";
