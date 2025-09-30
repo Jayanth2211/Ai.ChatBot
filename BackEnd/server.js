@@ -47,7 +47,7 @@ if (fs.existsSync(distPath)) {
 // Alternative using PositionStack (free 25k requests/month)
 
 // Replace with your actual free API key from PositionStack
-const API_KEY = 'pk_1a2b3c4d5e6f7g8h9i0j'; // Example of real API key format
+const API_KEY = '7cb5975ab3de0a06e5d28d08d251814f'; 
 
 const reverseGeocode = async (latitude, longitude) => {
   try {
