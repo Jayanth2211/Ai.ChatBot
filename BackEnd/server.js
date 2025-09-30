@@ -50,28 +50,36 @@ const reverseGeocode = async (latitude, longitude) => {
   try {
     const API_KEY = '7cb5975ab3de0a06e5d28d08d251814f';
     
-    console.log('Making PositionStack request...');
     const response = await fetch(
-      `http://api.positionstack.com/v1/reverse?access_key=${API_KEY}&query=${latitude},${longitude}`
+      `https://api.positionstack.com/v1/reverse?access_key=${API_KEY}&query=${latitude},${longitude}`
     );
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
     
     const data = await response.json();
     
-    console.log('PositionStack full response:', data); // Debug log
+    // Log the full response to see what's happening
+    console.log('=== POSITIONSTACK DEBUG ===');
+    console.log('API Response:', data);
+    console.log('Data available:', data && data.data && data.data.length > 0);
+    if (data && data.data && data.data.length > 0) {
+      console.log('First location:', data.data[0]);
+    }
+    console.log('==========================');
     
-    // Check if we have valid data
-    if (data && data.data && data.data.length > 0 && data.data[0]) {
+    if (data && data.data && data.data.length > 0) {
       const location = data.data[0];
       
-      console.log('Location data:', location); // Debug log
+      // Build address from available components
+      const addressParts = [];
+      if (location.name) addressParts.push(location.name);
+      if (location.locality) addressParts.push(location.locality);
+      if (location.region) addressParts.push(location.region);
+      if (location.country) addressParts.push(location.country);
+      
+      const address = addressParts.length > 0 ? addressParts.join(', ') : location.label;
       
       return {
         success: true,
-        address: location.label || `${location.name}, ${location.region}, ${location.country}`,
+        address: address,
         details: {
           area: location.neighbourhood || location.locality || location.region,
           locality: location.locality,
@@ -83,58 +91,19 @@ const reverseGeocode = async (latitude, longitude) => {
           longitude: longitude
         }
       };
-    } else {
-      console.log('No location data found in response');
-      // Check if there's an error in the response
-      if (data.error) {
-        console.log('PositionStack API error:', data.error);
-      }
     }
     
   } catch (error) {
-    console.log('PositionStack request failed:', error.message);
+    console.log('Geocoding error:', error.message);
   }
   
-  // If PositionStack fails, try BigDataCloud as fallback
-  try {
-    console.log('Trying BigDataCloud fallback...');
-    const response = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-    );
-    
-    const data = await response.json();
-    
-    console.log('BigDataCloud response:', data);
-    
-    if (data && data.locality) {
-      return {
-        success: true,
-        address: `${data.locality}, ${data.city}, ${data.principalSubdivision}, ${data.countryName}`,
-        details: {
-          area: data.locality,
-          locality: data.locality,
-          city: data.city,
-          state: data.principalSubdivision,
-          country: data.countryName,
-          postcode: data.postcode,
-          latitude: latitude,
-          longitude: longitude
-        }
-      };
-    }
-    
-  } catch (error) {
-    console.log('BigDataCloud also failed:', error.message);
-  }
-  
-  // Final fallback - at least provide coordinates in a nice format
+  // Fallback
   return {
     success: true,
-    address: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+    address: `Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
     details: {
       latitude: latitude,
-      longitude: longitude,
-      note: 'Exact address not available'
+      longitude: longitude
     }
   };
 };
