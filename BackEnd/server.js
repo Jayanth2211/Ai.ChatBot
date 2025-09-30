@@ -17,10 +17,7 @@ const app = express();
 // Security middleware
 app.use(helmet());
 // Update CORS to allow Vite frontend
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080'],
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 app.use(requestIp.mw());
 
@@ -189,7 +186,7 @@ app.get('/api/location/reverse-geocode', async (req, res) => {
     if (!latitude || !longitude) {
       return res.status(400).json({ error: 'Latitude and longitude are required' });
     }
-    
+
 
     const geocodeResult = await reverseGeocode(latitude, longitude);
     

@@ -120,7 +120,8 @@ React.useEffect(()=>{
       const deviceData = await getDeviceLocation();
       
       
-      console.log("Device Data:", deviceData.areaName.address)
+      console.log("Device Data:", deviceData)
+        console.log("Device Data:", ipData)
       const locationMessage=`Your location: ${deviceData.areaName.address || ipData.area }`
       setMessages(pre=>[...pre,{text:locationMessage,isAi:true}])
 
@@ -138,7 +139,7 @@ React.useEffect(()=>{
       }
      else{
        try {
-        const response = await fetch('http://localhost:8000/api/chat', {
+        const response = await fetch('https://ai-chatbot-5-l8lf.onrender.com/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: userMessage }),
