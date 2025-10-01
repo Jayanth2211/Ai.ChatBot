@@ -8,6 +8,33 @@ import { useLocation } from './locationservices.jsx';
 import useVoiceRecognition from './voiceRecognition.jsx';
 
 const Chat = () => {
+  const [placeholders,setPlaceHolders]=React.useState('')
+  const searchList=['Type your message','Speak','Check your Weather','Search your location','Search current time','Search current date',"Type your message"]
+  
+  function delay(i){
+    return new Promise(resolve=>setTimeout(resolve,1000*i))
+  }
+ const [isMount,setMount]=React.useState(true)
+  React.useEffect(()=>{
+    function autoChange(){
+      searchList.forEach(async(ele,i)=>{
+        await delay(i)
+        setPlaceHolders(ele)
+      })
+    }
+    autoChange()
+    trigerFunc()
+  },[isMount])
+
+  function trigerFunc(){
+    setTimeout(()=>{
+      setMount(!isMount)
+    },10000)
+  }
+  
+
+
+  
   const { ipLocation,
     deviceLocation,
     areaName,
@@ -136,7 +163,7 @@ React.useEffect(()=>{
         setIsLoading(false)
       }
     }
-      else if(userMessage.toLowerCase().includes("wether")){
+      else if(userMessage.toLowerCase().includes("wether") || userMessage.toLowerCase().includes("weather")){
         try{
           const {latitude,longitude}=await fetchLocation()
           const api_key='82ccdfb8e81f438eadf205357253009'
@@ -347,7 +374,7 @@ setMessages(prev=>[...prev,{text:weatherMessage,isAi:true}])
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your message..."
+                placeholder={`${placeholders}...`}
                 className="flex-1 min-h-[60px] w-[100%] rounded-2xl border-2 border-gray-300 px-20 py-4 text-base focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 transition-all duration-200 pr-16"
                 disabled={isLoading}
               />
