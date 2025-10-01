@@ -163,6 +163,7 @@ React.useEffect(()=>{
         setIsLoading(false)
       }
     }
+    
       else if(userMessage.toLowerCase().includes("wether") || userMessage.toLowerCase().includes("weather")){
         try{
           const {latitude,longitude}=await fetchLocation()
