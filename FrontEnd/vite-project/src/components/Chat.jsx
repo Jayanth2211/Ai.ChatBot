@@ -12,7 +12,7 @@ const Chat = () => {
   const searchList=['Type your message','Speak','Check your Weather','Search your location','Search current time','Search current date',"Type your message"]
   
   function delay(i){
-    return new Promise(resolve=>setTimeout(resolve,1000*i))
+    return new Promise(resolve=>setTimeout(resolve,2000*i))
   }
  const [isMount,setMount]=React.useState(true)
   React.useEffect(()=>{
@@ -163,7 +163,7 @@ React.useEffect(()=>{
         setIsLoading(false)
       }
     }
-    
+
       else if(userMessage.toLowerCase().includes("wether") || userMessage.toLowerCase().includes("weather")){
         try{
           const {latitude,longitude}=await fetchLocation()
