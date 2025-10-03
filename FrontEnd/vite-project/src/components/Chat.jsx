@@ -306,6 +306,7 @@ setMessages(prev=>[...prev,{text:weatherMessage,isAi:true}])
             <span className="text-[100%] text-pink-600"><span className='text-3xl'>O</span><span className='text-2xl'>r</span>vix</span>  AI </h1>
             <div className='w-[40%] flex flex-col items-end justify-end gap-1'><span className='text-slate-700 font-bold'>  <a href="https://jayanth-portfolio.onrender.com/" target='_blank'>&copy;JAYANTH</a></span></div>
           
+          
         </div>
         
       </div>
