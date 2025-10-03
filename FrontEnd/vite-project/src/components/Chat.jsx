@@ -304,14 +304,14 @@ setMessages(prev=>[...prev,{text:weatherMessage,isAi:true}])
         <div className="max-w-[95%]  mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
           <h1 className="text-[80%] transform scale-140 w-[40%] font-bold text-gray-900 flex items-center gap-2">
             <span className="text-[100%] text-pink-600"><span className='text-3xl'>O</span><span className='text-2xl'>r</span>vix</span>  AI </h1>
-            <div className='w-[40%] flex flex-col items-end justify-end gap-1'><span className='text-slate-700 font-bold'>  <a href="https://jayanth-portfolio.onrender.com/" target='_blank'>&copy;JAYANTH</a></span></div>
+            <div className='w-[40%] flex flex-col items-end justify-end gap-1'><span className='text-red-700 font-bold'>  <a href="https://jayanth-portfolio.onrender.com/" target='_blank'>&copy;JAYANTH</a></span></div>
           
-          
+
         </div>
         
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-gray-200 p-4 space-y-6 ">
+      <div className="flex-1 overflow-y-auto bg-gray-200 p-4 space-y-6  ">
         {messages.length === 0 ? (
           <div className="flex flex-col  items-center justify-center h-full text-center text-gray-500">
             <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
