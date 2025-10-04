@@ -1,7 +1,7 @@
 import React from 'react';
 import { MicrophoneIcon, SpeakerWaveIcon, UserIcon, ComputerDesktopIcon } 
 from '@heroicons/react/24/outline';
-import { useSpeech } from "react-text-to-speech";
+
 
 const ChatMessage = ({ message, isAi }) => {
   
