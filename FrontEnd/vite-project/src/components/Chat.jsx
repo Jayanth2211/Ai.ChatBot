@@ -270,7 +270,7 @@ setMessages(prev=>[...prev,{text:weatherMessage,isAi:true}])
       }
      else{
        try {
-        const response = await fetch('https://ai-chatbot-5-l8lf.onrender.com/api/chat', {
+        const response = await fetch('https://ai-chatbot-4-eunv.onrender.com/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: userMessage }),
