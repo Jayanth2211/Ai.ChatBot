@@ -9,6 +9,7 @@ const api = axios.create({
   },
 });
 
+
 export const locationAPI = {
   // Get enhanced IP location with area names
   getIPLocation: () => api.get('/location/ip-enhanced'),
